@@ -2,6 +2,10 @@
 
 按"勾选能力项 + agent 桥梁"的方式生成 Dockerfile，构建镜像，起容器，代理 agent 对话与文件收发。
 
+## License
+
+本项目以 [MIT](LICENSE) 协议开源。
+
 ## 核心思想
 
 - **能力项（Capability）** 是扩展点。每个能力类重写 `build()`，输出：
