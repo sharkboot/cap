@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# 运行时产物（控制面 / 容器工作目录 / 诊断日志）
+work/
+*.log
+
+# 本地配置（避免提交敏感 registry / 密钥相关本地覆盖）
+*.local
+.env
+
+# Docker 构建缓存（若在此目录本地 build）
+.docker/

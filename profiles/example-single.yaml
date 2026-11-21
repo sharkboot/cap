@@ -1,0 +1,9 @@
+# 单能力组合：只装 open-code-review
+agent: pi
+capabilities:
+  - name: open-code-review
+    params:
+      target_branch: main
+model:
+  provider: anthropic
+  id: claude-sonnet-4-5

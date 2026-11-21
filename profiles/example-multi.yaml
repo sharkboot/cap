@@ -1,0 +1,23 @@
+# 多能力组合：open-code-review + llm-gateway + doc-search
+agent: pi
+
+capabilities:
+  - name: open-code-review
+    params:
+      target_branch: main
+  - name: llm-gateway
+    params:
+      models: [sonnet-4-5, gpt-4o]
+  - name: doc-search
+
+api_keys:
+  openai: ${OPENAI_KEY}
+  anthropic: ${ANTHROPIC_KEY}
+
+model:
+  provider: anthropic
+  id: claude-sonnet-4-5
+
+resources:
+  cpu: 2.0
+  mem: 4g

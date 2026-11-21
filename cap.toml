@@ -1,0 +1,20 @@
+# cap 控制面配置
+[server]
+host = "0.0.0.0"
+port = 8080
+
+[paths]
+# 相对 cap 项目根目录
+work_root = "work"
+build_root = "build"
+profile_root = "profiles"
+
+[resources]
+# 默认资源限额（profile.resources 可覆盖）
+cpu = 1.0
+mem = "2g"
+
+[registry]
+# 可选：镜像推送目标
+push = false
+registry = "registry.local:5000"

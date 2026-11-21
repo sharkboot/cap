@@ -1,0 +1,4 @@
+# open-code-review 能力配置（占位，真实值按能力文档填）
+default_branch: main
+severity_threshold: medium
+output_format: markdown
