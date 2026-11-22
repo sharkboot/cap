@@ -18,3 +18,16 @@ mem = "2g"
 # 可选：镜像推送目标
 push = false
 registry = "registry.local:5000"
+
+[images]
+# 最多保留多少个 cap/* 镜像，超出按 LRU 删（最近使用起算）
+max_images = 20
+# 镜像最近使用后超过 ttl_hours 且未被运行中容器占用则销毁（0 = 不启用 TTL）
+ttl_hours = 72
+# build 前要求宿主机至少这么多空闲内存（psutil 探测），低于则拒绝 build
+min_free_mem_mb = 2048
+# 后台 GC 线程多久扫一次（秒），0 = 只手动触发 / 不自动扫 TTL
+gc_interval_sec = 3600
+# 容量规划提示值（非硬限制），用于 /v1/images 返回预估
+est_build_mem_mb = 1024
+est_image_disk_mb = 512

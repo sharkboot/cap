@@ -58,7 +58,9 @@ def start_session(req: StartRequest):
         raise HTTPException(400, str(e))
 
     try:
-        manager = ContainerManager(host_root / "work")
+        from cap.gc_singleton import get_gc
+        gc = get_gc()
+        manager = ContainerManager(host_root / "work", usage_recorder=gc.record_usage)
         running = manager.start(artifact, profile, session_name=req.name)
     except Exception as e:
         raise HTTPException(500, f"容器启动失败: {e}")

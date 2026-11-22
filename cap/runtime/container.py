@@ -22,12 +22,16 @@ class RunningContainer:
 
 
 class ContainerManager:
-    def __init__(self, work_root: Path, log_prefix: str = "cap"):
+    def __init__(self, work_root: Path, log_prefix: str = "cap",
+                 usage_recorder: callable | None = None):
+        """usage_recorder: 容器启动某镜像时回调 (image_tag) → 刷新其"最近使用"。
+        不传则不记录（GC 会退化为按镜像 created 时间兜底）。"""
         self.work_root = Path(work_root)
         self.work_root.mkdir(parents=True, exist_ok=True)
         self.client = docker.from_env()
         self.log = logging.getLogger(f"{log_prefix}.container")
         self._prefix = log_prefix
+        self._usage_recorder = usage_recorder
 
     def start(
         self,
@@ -76,6 +80,12 @@ class ContainerManager:
             host_port=container.ports["8000/tcp"][0]["HostPort"],
             artifact=artifact,
         )
+        # 记录镜像"最近使用"（供 GC 的 LRU/TTL 基准）
+        if self._usage_recorder is not None:
+            try:
+                self._usage_recorder(artifact.image_tag)
+            except Exception as e:
+                self.log.warning("usage 记录失败（不影响运行）: %s", e)
         self._wait_healthy(running)
         return running
 

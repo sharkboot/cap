@@ -31,6 +31,18 @@ def _startup() -> None:
     caps = [c["name"] for c in list_capabilities()]
     ags = [a["name"] for a in list_agents()]
     logging.getLogger("cap").info("registered capabilities=%s agents=%s", caps, ags)
+    # 启动后台镜像 GC 线程（内存闸门 + 数量上限 + TTL 扫描）
+    from cap.gc_singleton import init_gc
+    init_gc()
+
+
+@app.on_event("shutdown")
+def _shutdown() -> None:
+    from cap.gc_singleton import get_gc
+    try:
+        get_gc().stop_background()
+    except Exception:
+        pass
 
 
 app.include_router(images.router, tags=["capabilities"])
