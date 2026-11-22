@@ -17,3 +17,4 @@ work/
 
 # Docker 构建缓存（若在此目录本地 build）
 .docker/
+.bitfun/

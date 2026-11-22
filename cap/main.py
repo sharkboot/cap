@@ -12,6 +12,8 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
+from cap.agents import list_agents
+from cap.capabilities import list_capabilities
 from cap.api import images, sessions
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)s %(message)s")
@@ -26,8 +28,8 @@ app = FastAPI(
 @app.on_event("startup")
 def _startup() -> None:
     # 打印已注册的能力与 agent，方便排查
-    caps = [c["name"] for c in images.get_capabilities()]
-    ags = [a["name"] for a in images.get_agents()]
+    caps = [c["name"] for c in list_capabilities()]
+    ags = [a["name"] for a in list_agents()]
     logging.getLogger("cap").info("registered capabilities=%s agents=%s", caps, ags)
 
 

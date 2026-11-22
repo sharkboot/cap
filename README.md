@@ -51,6 +51,12 @@ pip install -e .
 python -m cap.main
 # → http://localhost:8080/v1/health
 
+# 2b. 查询已有能力（支持来源过滤 / 关键词搜索 / 单能力详情）
+curl "http://localhost:8080/v1/capabilities"          # 全部
+curl "http://localhost:8080/v1/capabilities?source=local"
+curl "http://localhost:8080/v1/capabilities?q=llm"
+curl "http://localhost:8080/v1/capabilities/doc-search"
+
 # 3. 构建镜像（按 profile）
 curl -X POST http://localhost:8080/v1/images \
   -H 'content-type: application/json' \

@@ -75,6 +75,10 @@ class Capability:
     VERSION: str = "0.0.0"
     #: 可选：声明依赖的其它能力 NAME（框架做校验，不强制）
     DEPENDS_ON: tuple[str, ...] = ()
+    #: 能力来源：local（需本地 resources/<name>/ 烘焙进镜像）
+    #:          remote（通过 pi install 拉 npm/git 包）
+    #:          both   （两者皆可，默认按 local 处理）
+    SOURCE: str = "local"
 
     def build(self, ctx: CapabilityContext) -> CapabilityBuildOutput:
         raise NotImplementedError

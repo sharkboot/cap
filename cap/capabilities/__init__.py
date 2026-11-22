@@ -7,6 +7,8 @@
    E:/LLM/cap/resources/<name>/ 目录
 4. profile.yaml 里加 - name: <name>
 """
+from pathlib import Path
+
 from .base import Capability, CapabilityContext, CapabilityBuildOutput
 from .open_code_review import OpenCodeReviewCapability
 from .llm_gateway import LlmGatewayCapability
@@ -33,14 +35,62 @@ def get_capability(name: str) -> Capability:
     return _REGISTRY[name]()
 
 
-def list_capabilities() -> list[dict]:
-    """列出所有已注册能力（用于 /v1/capabilities 端点）。"""
+def _host_root() -> Path:
+    """cap 项目根目录（含 resources/）。从本文件位置推导，跨部署稳定。"""
+    return Path(__file__).resolve().parents[2]
+
+
+def _has_local_resources(name: str) -> bool:
+    """该能力是否有本地 resources/<name>/ 可烘焙进镜像。"""
+    return (_host_root() / "resources" / name).is_dir()
+
+
+def _capability_meta(name: str, cls: type[Capability]) -> dict:
+    """单个能力的元数据。"""
+    inst = cls()
+    return {
+        "name": name,
+        "version": inst.VERSION,
+        "source": inst.SOURCE,                       # local / remote / both
+        "has_local_resources": _has_local_resources(name),  # 实际可烘焙的判定
+        "depends_on": list(inst.DEPENDS_ON),
+        "doc": (inst.__doc__ or "").strip().split("\n")[0],
+        "class": cls.__name__,
+    }
+
+
+def list_capabilities(source: str | None = None, keyword: str | None = None) -> list[dict]:
+    """列出能力，可按来源与关键词过滤（用于 /v1/capabilities 端点）。
+
+    source : local | remote | both | None（None = 不过滤）
+    keyword: 在 name + doc 里做大小写不敏感的子串匹配；None = 不过滤
+    """
+    kw = keyword.strip().lower() if keyword else None
     out = []
     for name, cls in _REGISTRY.items():
-        inst = cls()
-        out.append({
-            "name": name,
-            "version": inst.VERSION,
-            "doc": (inst.__doc__ or "").strip().split("\n")[0],
-        })
+        meta = _capability_meta(name, cls)
+        # 来源过滤
+        if source:
+            want = source
+            got = meta["source"]
+            if want == "local" and not (got in ("local", "both") and meta["has_local_resources"]):
+                continue
+            if want == "remote" and got not in ("remote", "both"):
+                continue
+            if want == "both" and got != "both":
+                continue
+        # 关键词过滤
+        if kw:
+            haystack = (meta["name"] + " " + meta["doc"]).lower()
+            if kw not in haystack:
+                continue
+        out.append(meta)
     return out
+
+
+def get_capability_detail(name: str) -> dict:
+    """单个能力完整元数据；未注册时抛 KeyError。"""
+    if name not in _REGISTRY:
+        available = ", ".join(sorted(_REGISTRY))
+        raise KeyError(f"未注册的能力: {name!r}；可用: {available}")
+    return _capability_meta(name, _REGISTRY[name])

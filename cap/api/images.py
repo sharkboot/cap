@@ -1,9 +1,9 @@
 """镜像 / 能力 API。"""
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from cap.agents import list_agents
-from cap.capabilities import list_capabilities
+from cap.capabilities import list_capabilities, get_capability_detail
 from cap.profile import Profile
 
 router = APIRouter(prefix="/v1")
@@ -22,8 +22,21 @@ class BuildResponse(BaseModel):
 
 
 @router.get("/capabilities")
-def get_capabilities() -> list[dict]:
-    return list_capabilities()
+def get_capabilities(
+    source: str | None = Query(default=None, description="按来源过滤: local | remote | both"),
+    q: str | None = Query(default=None, description="关键词，匹配 name 或 doc"),
+) -> list[dict]:
+    """查询已有能力，支持按来源过滤与关键词搜索。"""
+    return list_capabilities(source=source, keyword=q)
+
+
+@router.get("/capabilities/{name}")
+def get_capability(name: str) -> dict:
+    """单个能力的完整元数据（版本、来源、依赖、是否有本地资源等）。"""
+    try:
+        return get_capability_detail(name)
+    except KeyError as e:
+        raise HTTPException(404, str(e))
 
 
 @router.get("/agents")
